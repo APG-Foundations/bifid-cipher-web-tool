@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt and Decrypt with Bifid Cipher</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+        function createPolybiusSquare(secretKey) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let keySquare = "";
+            for (let char of secretKey.toUpperCase()) {
+                if (!keySquare.includes(char) && alphabet.includes(char)) {
+                    keySquare += char;
+                }
+            }
+            for (let char of alphabet) {
+                if (!keySquare.includes(char)) {
+                    keySquare += char;
+                }
+            }
+            return keySquare;
+        }
+
+        function getCoordinates(polybiusSquare, char) {
+            const index = polybiusSquare.indexOf(char);
+            return [Math.floor(index / 6) + 1, (index % 6) + 1];
+        }
+
+        function bifidCipherEncode(message, secretKey) {
+            const polybiusSquare = createPolybiusSquare(secretKey);
+            message = message.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            let rowCoords = [], colCoords = [];
+            for (let char of message) {
+                let [row, col] = getCoordinates(polybiusSquare, char);
+                rowCoords.push(row);
+                colCoords.push(col);
+            }
+
+            let combinedCoords = rowCoords.concat(colCoords);
+            let encodedMessage = "";
+            for (let i = 0; i < combinedCoords.length; i += 2) {
+                let r = combinedCoords[i] - 1;
+                let c = combinedCoords[i + 1] - 1;
+                encodedMessage += polybiusSquare[r * 6 + c];
+            }
+
+            return encodedMessage;
+        }
+
+        function bifidCipherDecode(encodedMessage, secretKey) {
+            const polybiusSquare = createPolybiusSquare(secretKey);
+            encodedMessage = encodedMessage.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            let coordinates = [];
+            for (let char of encodedMessage) {
+                let [row, col] = getCoordinates(polybiusSquare, char);
+                coordinates.push(row, col);
+            }
+
+            let halfLength = coordinates.length / 2;
+            let rowCoords = coordinates.slice(0, halfLength);
+            let colCoords = coordinates.slice(halfLength);
+
+            let decodedMessage = "";
+            for (let i = 0; i < rowCoords.length; i++) {
+                let r = rowCoords[i] - 1;
+                let c = colCoords[i] - 1;
+                decodedMessage += polybiusSquare[r * 6 + c];
+            }
+
+            return decodedMessage;
+        }
+
+        function encrypt() {
+            const plaintext = document.getElementById('plaintext').value;
+            const passphrase = document.getElementById('passphrase').value;
+            const ciphertext = bifidCipherEncode(plaintext, passphrase);
+            document.getElementById('ciphertext').value = ciphertext;
+        }
+
+        function decrypt() {
+            const encryptedtext = document.getElementById('encryptedtext').value;
+            const passphrase = document.getElementById('passphrase2').value;
+            const plaintext = bifidCipherDecode(encryptedtext, passphrase);
+            document.getElementById('plaintext2').value = plaintext;
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div>
+            <h3>Simple Bifid cipher</h3>
+            <p><small>Free for use :)</small></p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Encrypt</h4>
+            </div>
+            <div class="col-md-9">
+                <label for="plaintext">Plaintext</label>
+                <div class="form-group mb-3">
+                    <textarea class="form-control" placeholder="Input Value" id="plaintext"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="passphrase">Passphrase</label>
+                <div class="form-group mb-3">
+                    <input type="text" class="form-control" placeholder="Input Value" id="passphrase">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <button class="btn btn-success" type="button" onclick="encrypt()">Encrypt</button>
+                <br><br>
+                <div>
+                    <label for="ciphertext">Ciphertext</label>
+                    <input type="text" class="form-control" placeholder="Output Value" id="ciphertext" readonly>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <br><br>
+                <hr>
+            </div>
+
+            <div class="col-md-12">
+                <h4>Decrypt</h4>
+            </div>
+            <div class="col-md-9">
+                <label for="encryptedtext">Ciphertext</label>
+                <div class="form-group mb-3">
+                    <input type="text" class="form-control" placeholder="Input Value" id="encryptedtext">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="passphrase2">Passphrase</label>
+                <div class="form-group mb-3">
+                    <input type="text" class="form-control" placeholder="Input Value" id="passphrase2">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <button class="btn btn-success" type="button" onclick="decrypt()">Decrypt</button>
+                <br><br>
+                <div>
+                    <label for="plaintext2">Plaintext</label>
+                    <textarea class="form-control" placeholder="Output Value" id="plaintext2" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
