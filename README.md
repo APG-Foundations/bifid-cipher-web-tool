@@ -27,5 +27,5 @@ To run this project locally, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/bifid-cipher-web-tool.git
+   git clone https://github.com/aravind-govindhasamy/bifid-cipher-web-tool.git
    cd bifid-cipher-web-tool
